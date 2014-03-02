@@ -84,6 +84,10 @@
 #  [ensure]
 #    *Optional* (defaults to 'present')
 #
+#  [server_package]
+#    *Optional* The name of the system package containing the
+#    ldap server. Will have a sensible default based on your
+#    distribution.
 #
 # == Tested/Works on:
 #   - Debian:    5.0   / 6.0   / 7.x
@@ -138,6 +142,7 @@ class ldap::server::master(
   $syncprov_sessionlog = '100',
   $sync_binddn         = false,
   $enable_motd         = false,
+  $server_package      = $ldap::params::server_package,
   $ensure              = present) {
 
   require ldap
@@ -146,7 +151,7 @@ class ldap::server::master(
     motd::register { 'ldap::server::master': }
   }
 
-  package { $ldap::params::server_package:
+  package { $server_package:
     ensure => $ensure
   }
 
@@ -155,7 +160,7 @@ class ldap::server::master(
     enable     => true,
     pattern    => $ldap::params::server_pattern,
     require    => [
-      Package[$ldap::params::server_package],
+      Package[$server_package],
       File["${ldap::params::prefix}/${ldap::params::server_config}"],
       ]
   }
@@ -188,10 +193,10 @@ class ldap::server::master(
     notify  => Service[$ldap::params::service],
     require => $ssl ? {
       false => [
-        Package[$ldap::params::server_package],
+        Package[$server_package],
         ],
       true  => [
-        Package[$ldap::params::server_package],
+        Package[$server_package],
         File['ssl_ca'],
         File['ssl_cert'],
         File['ssl_key'],
