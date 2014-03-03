@@ -108,8 +108,8 @@
 #  schema_inc  => [ 'gosa/samba3', 'gosa/gosystem' ],
 #  index_inc   => [
 #  'index memberUid            eq',
-#    'index mail                 eq',
-#    'index givenName            eq,subinitial',
+#    'index mail               eq',
+#    'index givenName          eq,subinitial',
 #    ],
 #  }
 #
@@ -243,14 +243,14 @@ class ldap::server::master(
                     default => 'posix'
                   },
       require  => File['ssl_cert'],
-      path     => [ "/bin", "/usr/bin", "/sbin", "/usr/sbin" ]
+      path     => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ]
     }
 
   }
 
   # Additional configurations (for rc scripts)
   case $::osfamily {
-    
+
     'Debian' : {
       class { 'ldap::server::debian': ssl => $ssl }
     }
@@ -263,6 +263,9 @@ class ldap::server::master(
     #  class { 'ldap::server::suse':   ssl => $ssl }
     #}
 
+    default : {
+      fail("Unsupported osfamily (${::osfamily})")
+    }
   }
 
 }
