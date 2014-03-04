@@ -191,6 +191,7 @@ class ldap::server::master(
     mode    => '0640',
     owner   => $ldap::params::server_owner,
     group   => $ldap::params::server_group,
+    require => Package[$server_package],
   }
 
   file { "${ldap::params::prefix}/${ldap::params::server_config}":
