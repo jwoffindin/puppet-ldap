@@ -83,17 +83,17 @@
 #    *Optional* (defaults to false)
 #
 #  [ssl_cert]
-#    Public certificate filename (should be located at puppet:///files/ldap)
+#    Public certificate filename (should be located at ${cert_filestore})
 #    *Requires*: ssl => true
 #    *Optional* (defaults to false)
 #
 #  [ssl_ca]
-#    CA certificate filename (should be located at puppet:///files/ldap)
+#    CA certificate filename (should be located at ${cert_filestore})
 #    *Requires*: ssl => true
 #    *Optional* (defaults to false)
 #
 #  [ssl_key]
-#    Private certificate filename (should be located at puppet:///files/ldap)
+#    Private certificate filename (should be located at ${cert_filestore})
 #    *Requires*: ssl => true
 #    *Optional* (defaults to false)
 #
@@ -125,6 +125,11 @@
 #    Use motd to report the usage of this module.
 #    *Requires*: https://github.com/torian/puppet-motd.git
 #    *Optional* (defaults to false)
+#
+#  [cert_filestore]
+#    *Optional* SSL certificates are not bundled with this module
+#    but are retrieved from external source. Defaults to 
+#    puppet:///files/ldap.
 #
 #  [ensure]
 #    *Optional* (defaults to 'present')
@@ -190,6 +195,7 @@ class ldap::server::slave(
   $sync_attrs     = '*',
   $sync_scope     = 'sub',
   $enable_motd    = false,
+  $cert_filestore = "puppet:///files/ldap",
   $ensure         = 'present') {
 
   require ldap
@@ -253,14 +259,14 @@ class ldap::server::slave(
   }
 
   $msg_prefix = 'SSL enabled. You must specify'
-  $msg_suffix = '(filename). It should be located at puppet:///files/ldap'
+  $msg_suffix = "(filename). It should be located at ${cert_filestore}"
 
   if($ssl) {
 
     if(!$ssl_ca) { fail("${msg_prefix} ssl_ca ${msg_suffix}") }
     file { 'ssl_ca':
       ensure  => present,
-      source  => "puppet:///files/ldap/${ssl_ca}",
+      source  => "${cert_filestore}/${ssl_ca}",
       path    => "${ldap::params::ssl_prefix}/${ssl_ca}",
       mode    => '0644',
     }
@@ -268,7 +274,7 @@ class ldap::server::slave(
     if(!$ssl_cert) { fail("${msg_prefix} ssl_cert ${msg_suffix}") }
     file { 'ssl_cert':
       ensure  => present,
-      source  => "puppet:///files/ldap/${ssl_cert}",
+      source  => "${cert_filestore}/${ssl_cert}",
       path    => "${ldap::params::ssl_prefix}/${ssl_cert}",
       mode    => '0644',
     }
@@ -276,7 +282,7 @@ class ldap::server::slave(
     if(!$ssl_key) { fail("${msg_prefix} ssl_key ${msg_suffix}") }
     file { 'ssl_key':
       ensure  => present,
-      source  => "puppet:///files/ldap/${ssl_key}",
+      source  => "${cert_filestore}/${ssl_key}",
       path    => "${ldap::params::ssl_prefix}/${ssl_key}",
     }
 

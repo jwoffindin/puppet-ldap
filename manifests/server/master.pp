@@ -84,6 +84,11 @@
 #  [ensure]
 #    *Optional* (defaults to 'present')
 #
+#  [cert_filestore]
+#    *Optional* SSL certificates are not bundled with this module
+#    but are retrieved from external source. Defaults to 
+#    puppet:///files/ldap.
+#
 #  [server_package]
 #    *Optional* The name of the system package containing the
 #    ldap server. Will have a sensible default based on your
@@ -143,6 +148,7 @@ class ldap::server::master(
   $sync_binddn         = false,
   $enable_motd         = false,
   $server_package      = $ldap::params::server_package,
+  $cert_filestore      = "puppet:///files/ldap",
   $ensure              = present) {
 
   require ldap
@@ -205,14 +211,14 @@ class ldap::server::master(
   }
 
   $msg_prefix = 'SSL enabled. You must specify'
-  $msg_suffix = '(filename). It should be located at puppet:///files/ldap'
+  $msg_suffix = "(filename). It should be located at ${cert_filestore}"
 
   if($ssl) {
 
     if(!$ssl_ca) { fail("${msg_prefix} ssl_ca ${msg_suffix}") }
     file { 'ssl_ca':
       ensure  => present,
-      source  => "puppet:///files/ldap/${ssl_ca}",
+      source  => "${cert_filestore}/${ssl_ca}",
       path    => "${ldap::params::ssl_prefix}/${ssl_ca}",
       mode    => '0644',
     }
@@ -220,7 +226,7 @@ class ldap::server::master(
     if(!$ssl_cert) { fail("${msg_prefix} ssl_cert ${msg_suffix}") }
     file { 'ssl_cert':
       ensure  => present,
-      source  => "puppet:///files/ldap/${ssl_cert}",
+      source  => "${cert_filestore}/${ssl_cert}",
       path    => "${ldap::params::ssl_prefix}/${ssl_cert}",
       mode    => '0644',
     }
@@ -228,7 +234,7 @@ class ldap::server::master(
     if(!$ssl_key) { fail("${msg_prefix} ssl_key ${msg_suffix}") }
     file { 'ssl_key':
       ensure  => present,
-      source  => "puppet:///files/ldap/${ssl_key}",
+      source  => "${cert_filestore}/${ssl_key}",
       path    => "${ldap::params::ssl_prefix}/${ssl_key}",
     }
 
